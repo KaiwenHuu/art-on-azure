@@ -60,6 +60,15 @@ public class Controller {
 		return modelAndView;
 	}
 
+    @RequestMapping("edit-post")
+	public ModelAndView editPostPage(@RequestParam Long id, ModelMap model) {
+		ModelAndView modelAndView = new ModelAndView();
+		Description description = descriptionRepository.findById(id).get();
+		model.addAttribute("description", description);
+		modelAndView.setViewName("editPost");
+		return modelAndView;
+	}
+
     @PostMapping("posts")
 	public ModelAndView uploadFile(@RequestParam("file") MultipartFile file, @RequestParam("caption") String caption,
 			@RequestParam("location") String location, ModelMap model, RedirectAttributes redirectAttributes) throws IOException {
@@ -74,6 +83,7 @@ public class Controller {
 		storageService = new StorageService(keyVaultService.getSecret("storagesastoken"));
 		storageService.uploadFile(file, id);
 		
+        // TODO: after clicking the submit button, not rendering posts.html properly.
 		ModelAndView modelAndView = new ModelAndView();
 		List<Description> descriptions = descriptionRepository.findAll();
 		model.addAttribute("descriptions", descriptions);
@@ -87,8 +97,29 @@ public class Controller {
 		
 		storageService = new StorageService(keyVaultService.getSecret("storagesastoken"));
 		storageService.deleteFile(id);
-		
+		// TODO: does not bring you back the updated posts.html page.
 		return ResponseEntity.noContent().build();
+	}
+
+    @PostMapping("posts/{id}")
+	public ModelAndView updatePost(@PathVariable Long id, @RequestParam("file") MultipartFile file,
+			@RequestParam("caption") String caption, @RequestParam("location") String location, ModelMap model,
+			RedirectAttributes redirectAttributes) throws IOException {
+		descriptionRepository.deleteById(id);
+		String fileName = file.getOriginalFilename();
+		Description description = new Description(caption, fileName, location);
+		description.setId(id);
+		descriptionRepository.save(description);
+		
+		storageService = new StorageService(keyVaultService.getSecret("storagesastoken"));
+		storageService.deleteFile(id);
+		storageService.uploadFile(file, id);
+		
+		ModelAndView modelAndView = new ModelAndView();
+		List<Description> descriptions = descriptionRepository.findAll();
+		model.addAttribute("descriptions", descriptions);
+		modelAndView.setViewName("posts");
+		return modelAndView;
 	}
 
     private Long findFirstMissingPositive(List<Long> nums) {
