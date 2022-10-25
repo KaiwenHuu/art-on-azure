@@ -6,8 +6,11 @@ import java.util.List;
 import java.util.Set;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.ResponseEntity;
 import org.springframework.ui.ModelMap;
+import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
@@ -76,6 +79,16 @@ public class Controller {
 		model.addAttribute("descriptions", descriptions);
 		modelAndView.setViewName("posts");
 		return modelAndView;
+	}
+
+    @DeleteMapping("posts/{id}")
+	public ResponseEntity<Object> deletePostById(@PathVariable Long id) throws IOException {
+		descriptionRepository.deleteById(id);
+		
+		storageService = new StorageService(keyVaultService.getSecret("storagesastoken"));
+		storageService.deleteFile(id);
+		
+		return ResponseEntity.noContent().build();
 	}
 
     private Long findFirstMissingPositive(List<Long> nums) {
