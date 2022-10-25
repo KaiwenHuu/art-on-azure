@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+
+<html xmlns:th="http://www.thymeleaf.org">
+	<div class="container">
+	
+		<h1>Your Posts are</h1>
+		<table class="table">
+			<thead>
+				<tr>
+					<th>caption</th>
+					<th>filename</th>
+					<th>location</th>
+					<th>edit</th>
+					<th>delete</th>
+				</tr>
+			</thead>
+			<tbody>
+				<tr th:if="${descriptions.empty}">
+					<td colspan="5"> No Posts Available</td>
+				</tr>
+				<tr th:each="description : ${descriptions}">
+					<td><span th:text=${description.caption}>Caption</span></td>
+					<td><span th:text=${description.fileName}>Filename</span></td>
+					<td><span th:text=${description.location}>location</span></td>
+					<td>
+						<button th:id=${description.id} class="edit"> Edit </button>
+					</td>
+					<td>
+						<button th:id=${description.id} class="delete"> Delete </button> 
+					</td>
+				</tr>
+			</tbody>
+		</table>
+		<a href="new-art" class="btn btn-success">Add Post</a>
+		<script src="https://code.jquery.com/jquery-3.6.1.js" integrity="sha256-3zlB5s2uwoUzrXK3BT7AX3FyvojsraNFxCc2vC/7pNI=" crossorigin="anonymous"></script>
+		<script src="../js/posts.js"></script>
+	</div>
+</html>
