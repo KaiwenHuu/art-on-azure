@@ -115,6 +115,7 @@ public class Controller {
 		storageService.deleteFile(id);
 		storageService.uploadFile(file, id);
 		
+        // TODO: after clicking the submit button, not rendering posts.html properly.
 		ModelAndView modelAndView = new ModelAndView();
 		List<Description> descriptions = descriptionRepository.findAll();
 		model.addAttribute("descriptions", descriptions);
