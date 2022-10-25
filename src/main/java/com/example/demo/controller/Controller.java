@@ -37,5 +37,12 @@ public class Controller {
 		return modelAndView;
 	}
 
+    @RequestMapping("new-art")
+	public ModelAndView addArtPage() {
+		ModelAndView modelAndView = new ModelAndView();
+		modelAndView.setViewName("addArt");
+		return modelAndView;
+	}
+
 
 }

@@ -1,0 +1,32 @@
+<!DOCTYPE html>
+<html>
+	<body>
+	
+		<h2>Add Art Here</h2>
+			
+			<form method = "post" enctype = "multipart/form-data" action="/posts">
+				<input type = "file" name = "file"><br>
+				<!-- 
+				<label for="fileName">File Name:</label><br>
+				<input type="text" id="fileName" name="fileName" value=""><br>
+				 -->
+				
+				<label for="caption">Caption:</label><br>
+				<input type="text" id="caption" name="caption" value=""><br>
+				<label for="location">Location:</label><br>
+				<input type="text" id="location" name="location" value=""><br>
+				
+				
+				<input type="submit" id="submit" value="Submit">
+			</form>
+			
+			
+		<!-- 
+		<a href="../posts">	
+			<p>If you click the "Submit" button, you will call the post method.</p>
+		</a>
+		 -->
+		<script src="https://code.jquery.com/jquery-3.6.1.js" integrity="sha256-3zlB5s2uwoUzrXK3BT7AX3FyvojsraNFxCc2vC/7pNI=" crossorigin="anonymous"></script>
+		<script src="../js/addArt.js"></script>
+	</body>
+</html>
