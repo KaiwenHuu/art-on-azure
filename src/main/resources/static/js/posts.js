@@ -10,11 +10,11 @@ $('.delete').on('click', function() {
 		//contentType: 'application/json'
 	}).done(function (data, textStatus, jqXHR){
 		location.href = "../posts";
-    }).fail(function (jqXHR, textStatus, errorThrown) {
-        console.log(jqXHR.status);
-        console.log(textStatus);
-        console.log(errorThrown);
-    });
+  }).fail(function (jqXHR, textStatus, errorThrown) {
+    console.log(jqXHR.status);
+    console.log(textStatus);
+    console.log(errorThrown);
+  });
 });
 
 $('.edit').on('click', function() {

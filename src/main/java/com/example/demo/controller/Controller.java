@@ -28,23 +28,23 @@ import com.example.demo.storageservice.StorageService;
 @RestController
 public class Controller {
 
-    @Autowired
-    private Template template;
-    
-    @Autowired
-    private DescriptionJpaRepository descriptionRepository;
+	@Autowired
+	private Template template;
 
-    private StorageService storageService;
+	@Autowired
+	private DescriptionJpaRepository descriptionRepository;
 
-    private KeyVaultService keyVaultService = new KeyVaultService();
+	private StorageService storageService;
 
-    @RequestMapping("/")
-    public String home() {
-        return "Hello from Azure App Service! Let's start connecting to Azure SQL Server!";
-    }
+	private KeyVaultService keyVaultService = new KeyVaultService();
 
-    @RequestMapping("posts")
-    public ModelAndView getPosts(ModelMap model) {
+	@RequestMapping("/")
+	public String home() {
+		return "Hello from Azure App Service! Let's start connecting to Azure SQL Server!";
+	}
+
+	@GetMapping("/posts")
+	public ModelAndView getPosts(ModelMap model) {
 		ModelAndView modelAndView = new ModelAndView();
 		List<Description> descriptions = descriptionRepository.findAll();
 
@@ -53,14 +53,14 @@ public class Controller {
 		return modelAndView;
 	}
 
-  @RequestMapping("new-art")
+	@RequestMapping("/new-art")
 	public ModelAndView addArtPage() {
 		ModelAndView modelAndView = new ModelAndView();
 		modelAndView.setViewName("addArt");
 		return modelAndView;
 	}
 
-  @RequestMapping("edit-post")
+	@RequestMapping("/edit-post")
 	public ModelAndView editPostPage(@RequestParam Long id, ModelMap model) {
 		ModelAndView modelAndView = new ModelAndView();
 		Description description = descriptionRepository.findById(id).get();
@@ -69,39 +69,41 @@ public class Controller {
 		return modelAndView;
 	}
 
-	@PostMapping("posts")
+	@PostMapping("/posts")
 	public ModelAndView uploadFile(@RequestParam("file") MultipartFile file, @RequestParam("caption") String caption,
-			@RequestParam("location") String location, ModelMap model, RedirectAttributes redirectAttributes) throws IOException {
+			@RequestParam("location") String location, ModelMap model, RedirectAttributes redirectAttributes)
+			throws IOException {
 		String fileName = file.getOriginalFilename();
 		Description description = new Description(caption, fileName, location);
 		List<Long> ids = template.getIds("descriptions");
-		
+
 		Long id = findFirstMissingPositive(ids);
 		description.setId(id);
 		descriptionRepository.save(description);
-		
+
 		storageService = new StorageService(keyVaultService.getSecret("storagesastoken"));
 		storageService.uploadFile(file, id);
-		
-        // TODO: after clicking the submit button, not rendering posts.html properly.
+
+		// TODO: after clicking the submit button, not rendering posts.html properly.
+		// return "addArtResult.html";
 		ModelAndView modelAndView = new ModelAndView();
-		List<Description> descriptions = descriptionRepository.findAll();
-		model.addAttribute("descriptions", descriptions);
-		modelAndView.setViewName("posts");
+		// List<Description> descriptions = descriptionRepository.findAll();
+		// model.addAttribute("descriptions", descriptions);
+		modelAndView.setViewName("addArtResult");
 		return modelAndView;
 	}
 
-  @DeleteMapping("posts/{id}")
+	@DeleteMapping("posts/{id}")
 	public ResponseEntity<Object> deletePostById(@PathVariable Long id) throws IOException {
 		descriptionRepository.deleteById(id);
-		
+
 		storageService = new StorageService(keyVaultService.getSecret("storagesastoken"));
 		storageService.deleteFile(id);
 		// TODO: does not bring you back the updated posts.html page.
 		return ResponseEntity.noContent().build();
 	}
 
-  @PostMapping("posts/{id}")
+	@PostMapping("posts/{id}")
 	public ModelAndView updatePost(@PathVariable Long id, @RequestParam("file") MultipartFile file,
 			@RequestParam("caption") String caption, @RequestParam("location") String location, ModelMap model,
 			RedirectAttributes redirectAttributes) throws IOException {
@@ -110,12 +112,12 @@ public class Controller {
 		Description description = new Description(caption, fileName, location);
 		description.setId(id);
 		descriptionRepository.save(description);
-		
+
 		storageService = new StorageService(keyVaultService.getSecret("storagesastoken"));
 		storageService.deleteFile(id);
 		storageService.uploadFile(file, id);
-		
-        // TODO: after clicking the submit button, not rendering posts.html properly.
+
+		// TODO: after clicking the submit button, not rendering posts.html properly.
 		ModelAndView modelAndView = new ModelAndView();
 		List<Description> descriptions = descriptionRepository.findAll();
 		model.addAttribute("descriptions", descriptions);
@@ -123,7 +125,7 @@ public class Controller {
 		return modelAndView;
 	}
 
-  private Long findFirstMissingPositive(List<Long> nums) {
+	private Long findFirstMissingPositive(List<Long> nums) {
 		Set<Long> set = new HashSet<Long>(nums);
 		for (Long i = 1l; i <= nums.size(); i++) {
 			if (!set.contains(i)) {

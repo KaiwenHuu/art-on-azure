@@ -1,10 +1,11 @@
 <!DOCTYPE html>
-<html>
+<html xmlns:th="http://www.thymeleaf.org">
 	<body>
 	
 		<h2>Add Art Here</h2>
 			
-			<form method = "post" enctype = "multipart/form-data" action="/posts">
+			<form action="#" th:action="@{/posts}" method = "post" enctype = "multipart/form-data">
+				<label for="file">File:</label><br>
 				<input type = "file" name = "file"><br>
 				<!-- 
 				<label for="fileName">File Name:</label><br>
