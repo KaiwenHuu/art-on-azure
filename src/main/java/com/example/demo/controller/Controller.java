@@ -53,14 +53,14 @@ public class Controller {
 		return modelAndView;
 	}
 
-    @RequestMapping("new-art")
+  @RequestMapping("new-art")
 	public ModelAndView addArtPage() {
 		ModelAndView modelAndView = new ModelAndView();
 		modelAndView.setViewName("addArt");
 		return modelAndView;
 	}
 
-    @RequestMapping("edit-post")
+  @RequestMapping("edit-post")
 	public ModelAndView editPostPage(@RequestParam Long id, ModelMap model) {
 		ModelAndView modelAndView = new ModelAndView();
 		Description description = descriptionRepository.findById(id).get();
@@ -69,7 +69,7 @@ public class Controller {
 		return modelAndView;
 	}
 
-    @PostMapping("posts")
+	@PostMapping("posts")
 	public ModelAndView uploadFile(@RequestParam("file") MultipartFile file, @RequestParam("caption") String caption,
 			@RequestParam("location") String location, ModelMap model, RedirectAttributes redirectAttributes) throws IOException {
 		String fileName = file.getOriginalFilename();
@@ -91,7 +91,7 @@ public class Controller {
 		return modelAndView;
 	}
 
-    @DeleteMapping("posts/{id}")
+  @DeleteMapping("posts/{id}")
 	public ResponseEntity<Object> deletePostById(@PathVariable Long id) throws IOException {
 		descriptionRepository.deleteById(id);
 		
@@ -101,7 +101,7 @@ public class Controller {
 		return ResponseEntity.noContent().build();
 	}
 
-    @PostMapping("posts/{id}")
+  @PostMapping("posts/{id}")
 	public ModelAndView updatePost(@PathVariable Long id, @RequestParam("file") MultipartFile file,
 			@RequestParam("caption") String caption, @RequestParam("location") String location, ModelMap model,
 			RedirectAttributes redirectAttributes) throws IOException {
@@ -123,7 +123,7 @@ public class Controller {
 		return modelAndView;
 	}
 
-    private Long findFirstMissingPositive(List<Long> nums) {
+  private Long findFirstMissingPositive(List<Long> nums) {
 		Set<Long> set = new HashSet<Long>(nums);
 		for (Long i = 1l; i <= nums.size(); i++) {
 			if (!set.contains(i)) {
