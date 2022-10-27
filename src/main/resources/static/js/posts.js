@@ -14,6 +14,8 @@ $('.delete').on('click', function() {
     console.log(jqXHR.status);
     console.log(textStatus);
     console.log(errorThrown);
+		console.log(jqXHR.responseText)
+		location.href = "../errormessage?message=" + "there was an error";
   });
 });
 

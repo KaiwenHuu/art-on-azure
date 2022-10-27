@@ -6,6 +6,7 @@ import java.util.List;
 import java.util.Set;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.ui.ModelMap;
 import org.springframework.web.bind.annotation.DeleteMapping;
@@ -69,20 +70,36 @@ public class Controller {
 		return modelAndView;
 	}
 
+	@RequestMapping("/errormessage")
+	public ModelAndView errorPage(@RequestParam("message") String message, ModelMap model) {
+		ModelAndView modelAndView = new ModelAndView();
+		model.addAttribute("message", message);
+		modelAndView.setViewName("error");
+		return modelAndView;
+	}
+
 	@PostMapping("/posts")
 	public ModelAndView uploadFile(@RequestParam("file") MultipartFile file, @RequestParam("caption") String caption,
 			@RequestParam("location") String location, ModelMap model, RedirectAttributes redirectAttributes)
 			throws IOException {
-		String fileName = file.getOriginalFilename();
-		Description description = new Description(caption, fileName, location);
-		List<Long> ids = template.getIds("descriptions");
+		try {
+			String fileName = file.getOriginalFilename();
+			Description description = new Description(caption, fileName, location);
+			List<Long> ids = template.getIds("descriptions");
 
-		Long id = findFirstMissingPositive(ids);
-		description.setId(id);
-		descriptionRepository.save(description);
+			Long id = findFirstMissingPositive(ids);
+			description.setId(id);
+			descriptionRepository.save(description);
 
-		storageService = new StorageService(keyVaultService.getSecret("storagesastoken"));
-		storageService.uploadFile(file, id);
+			storageService = new StorageService(keyVaultService.getSecret("storagesastoken"));
+			storageService.uploadFile(file, id);
+		} catch (Exception e) {
+			// TODO: handle exception
+			ModelAndView modelAndView = new ModelAndView();
+			model.addAttribute("message", e.getMessage());
+			modelAndView.setViewName("error");
+			return modelAndView;
+		}
 
 		// TODO: after clicking the submit button, not rendering posts.html properly.
 		// return "addArtResult.html";
@@ -95,10 +112,15 @@ public class Controller {
 
 	@DeleteMapping("posts/{id}")
 	public ResponseEntity<Object> deletePostById(@PathVariable Long id) throws IOException {
-		descriptionRepository.deleteById(id);
+		try {
+			descriptionRepository.deleteById(id);
 
-		storageService = new StorageService(keyVaultService.getSecret("storagesastoken"));
-		storageService.deleteFile(id);
+			storageService = new StorageService(keyVaultService.getSecret("storagesastoken"));
+			storageService.deleteFile(id);
+		} catch (Exception e) {
+			return ResponseEntity.status(HttpStatus.FORBIDDEN).body(e.getMessage());
+		}
+
 		// TODO: does not bring you back the updated posts.html page.
 		return ResponseEntity.noContent().build();
 	}
@@ -107,15 +129,23 @@ public class Controller {
 	public ModelAndView updatePost(@PathVariable Long id, @RequestParam("file") MultipartFile file,
 			@RequestParam("caption") String caption, @RequestParam("location") String location, ModelMap model,
 			RedirectAttributes redirectAttributes) throws IOException {
-		descriptionRepository.deleteById(id);
-		String fileName = file.getOriginalFilename();
-		Description description = new Description(caption, fileName, location);
-		description.setId(id);
-		descriptionRepository.save(description);
+		try {
+			descriptionRepository.deleteById(id);
+			String fileName = file.getOriginalFilename();
+			Description description = new Description(caption, fileName, location);
+			description.setId(id);
+			descriptionRepository.save(description);
 
-		storageService = new StorageService(keyVaultService.getSecret("storagesastoken"));
-		storageService.deleteFile(id);
-		storageService.uploadFile(file, id);
+			storageService = new StorageService(keyVaultService.getSecret("storagesastoken"));
+			storageService.deleteFile(id);
+			storageService.uploadFile(file, id);
+		} catch (Exception e) {
+			// TODO: handle exception
+			ModelAndView modelAndView = new ModelAndView();
+			model.addAttribute("message", e.getMessage());
+			modelAndView.setViewName("error");
+			return modelAndView;
+		}
 
 		// TODO: after clicking the submit button, not rendering posts.html properly.
 		ModelAndView modelAndView = new ModelAndView();
