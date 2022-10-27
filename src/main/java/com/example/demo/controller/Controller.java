@@ -82,30 +82,38 @@ public class Controller {
 	public ModelAndView uploadFile(@RequestParam("file") MultipartFile file, @RequestParam("caption") String caption,
 			@RequestParam("location") String location, ModelMap model, RedirectAttributes redirectAttributes)
 			throws IOException {
-		try {
-			String fileName = file.getOriginalFilename();
-			Description description = new Description(caption, fileName, location);
-			List<Long> ids = template.getIds("descriptions");
 
+		String fileName = file.getOriginalFilename();
+		Description description = new Description(caption, fileName, location);
+		try {
+			List<Long> ids = template.getIds("descriptions");
 			Long id = findFirstMissingPositive(ids);
 			description.setId(id);
 			descriptionRepository.save(description);
-
-			storageService = new StorageService(keyVaultService.getSecret("storagesastoken"));
-			storageService.uploadFile(file, id);
+			try {
+				String sastoken = keyVaultService.getSecret("storagesastoken");
+				try {
+					storageService = new StorageService(sastoken);
+					storageService.uploadFile(file, id);
+				} catch (Exception e) {
+					ModelAndView modelAndView = new ModelAndView();
+					model.addAttribute("message", "could not access storage service" + e.getMessage());
+					modelAndView.setViewName("error");
+					return modelAndView;
+				}
+			} catch (Exception e) {
+				ModelAndView modelAndView = new ModelAndView();
+				model.addAttribute("message", "could not access keyvault" + e.getMessage());
+				modelAndView.setViewName("error");
+				return modelAndView;
+			}
 		} catch (Exception e) {
-			// TODO: handle exception
 			ModelAndView modelAndView = new ModelAndView();
-			model.addAttribute("message", e.getMessage());
+			model.addAttribute("message", "could not access database" + e.getMessage());
 			modelAndView.setViewName("error");
 			return modelAndView;
 		}
-
-		// TODO: after clicking the submit button, not rendering posts.html properly.
-		// return "addArtResult.html";
 		ModelAndView modelAndView = new ModelAndView();
-		// List<Description> descriptions = descriptionRepository.findAll();
-		// model.addAttribute("descriptions", descriptions);
 		modelAndView.setViewName("addArtResult");
 		return modelAndView;
 	}
@@ -120,8 +128,6 @@ public class Controller {
 		} catch (Exception e) {
 			return ResponseEntity.status(HttpStatus.FORBIDDEN).body(e.getMessage());
 		}
-
-		// TODO: does not bring you back the updated posts.html page.
 		return ResponseEntity.noContent().build();
 	}
 
@@ -135,19 +141,30 @@ public class Controller {
 			Description description = new Description(caption, fileName, location);
 			description.setId(id);
 			descriptionRepository.save(description);
-
-			storageService = new StorageService(keyVaultService.getSecret("storagesastoken"));
-			storageService.deleteFile(id);
-			storageService.uploadFile(file, id);
+			try {
+				String sastoken = keyVaultService.getSecret("storagesastoken");
+				try {
+					storageService = new StorageService(sastoken);
+					storageService.deleteFile(id);
+					storageService.uploadFile(file, id);
+				} catch (Exception e) {
+					ModelAndView modelAndView = new ModelAndView();
+					model.addAttribute("message", "could not access storage service" + e.getMessage());
+					modelAndView.setViewName("error");
+					return modelAndView;
+				}
+			} catch (Exception e) {
+				ModelAndView modelAndView = new ModelAndView();
+				model.addAttribute("message", "could not access keyvault" + e.getMessage());
+				modelAndView.setViewName("error");
+				return modelAndView;
+			}
 		} catch (Exception e) {
-			// TODO: handle exception
 			ModelAndView modelAndView = new ModelAndView();
-			model.addAttribute("message", e.getMessage());
+			model.addAttribute("message", "could not access data base" + e.getMessage());
 			modelAndView.setViewName("error");
 			return modelAndView;
 		}
-
-		// TODO: after clicking the submit button, not rendering posts.html properly.
 		ModelAndView modelAndView = new ModelAndView();
 		List<Description> descriptions = descriptionRepository.findAll();
 		model.addAttribute("descriptions", descriptions);
