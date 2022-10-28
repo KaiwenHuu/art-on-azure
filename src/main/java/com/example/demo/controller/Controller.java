@@ -41,7 +41,7 @@ public class Controller {
 
 	@RequestMapping("/")
 	public String home() {
-		return "Hello from Azure App Service! Let's start connecting to Azure SQL Server!";
+		return "Hello from Azure App Service in the staging slot! Let's start connecting to Azure SQL Server!";
 	}
 
 	@GetMapping("/posts")
