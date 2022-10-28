@@ -20,6 +20,7 @@ import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.servlet.ModelAndView;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
+import com.example.demo.cacheservice.CacheService;
 import com.example.demo.entity.Description;
 import com.example.demo.entity.jdbc.Template;
 import com.example.demo.entity.jparepository.DescriptionJpaRepository;
@@ -39,9 +40,11 @@ public class Controller {
 
 	private KeyVaultService keyVaultService = new KeyVaultService();
 
+	private CacheService cacheService;
+
 	@RequestMapping("/")
 	public String home() {
-		return "Hello from Azure App Service in the staging slot! Let's start connecting to Azure SQL Server!";
+		return "Hello from Azure App Service in the staging slot! We just implemented Cache Service!";
 	}
 
 	@GetMapping("/posts")
@@ -92,12 +95,22 @@ public class Controller {
 			descriptionRepository.save(description);
 			try {
 				String sastoken = keyVaultService.getSecret("storagesastoken");
+				String cacheKey = keyVaultService.getSecret("cacheKey");
 				try {
-					storageService = new StorageService(sastoken);
-					storageService.uploadFile(file, id);
+					cacheService = new CacheService(cacheKey);
+					cacheService.insertCache(id.toString(), description);
+					try {
+						storageService = new StorageService(sastoken);
+						storageService.uploadFile(file, id);
+					} catch (Exception e) {
+						ModelAndView modelAndView = new ModelAndView();
+						model.addAttribute("message", "could not access storage service" + e.getMessage());
+						modelAndView.setViewName("error");
+						return modelAndView;
+					}
 				} catch (Exception e) {
 					ModelAndView modelAndView = new ModelAndView();
-					model.addAttribute("message", "could not access storage service" + e.getMessage());
+					model.addAttribute("message", "could not access cache" + e.getMessage());
 					modelAndView.setViewName("error");
 					return modelAndView;
 				}
@@ -122,9 +135,24 @@ public class Controller {
 	public ResponseEntity<Object> deletePostById(@PathVariable Long id) throws IOException {
 		try {
 			descriptionRepository.deleteById(id);
-
-			storageService = new StorageService(keyVaultService.getSecret("storagesastoken"));
-			storageService.deleteFile(id);
+			try {
+				String sastoken = keyVaultService.getSecret("storagesastoken");
+				String cacheKey = keyVaultService.getSecret("cacheKey");
+				try {
+					storageService = new StorageService(sastoken);
+					storageService.deleteFile(id);
+					try {
+						cacheService = new CacheService(cacheKey);
+						cacheService.deleteFromCacheById(id.toString());
+					} catch (Exception e) {
+						return ResponseEntity.status(HttpStatus.FORBIDDEN).body(e.getMessage());
+					}
+				} catch (Exception e) {
+					return ResponseEntity.status(HttpStatus.FORBIDDEN).body(e.getMessage());
+				}
+			} catch (Exception e) {
+				return ResponseEntity.status(HttpStatus.FORBIDDEN).body(e.getMessage());
+			}
 		} catch (Exception e) {
 			return ResponseEntity.status(HttpStatus.FORBIDDEN).body(e.getMessage());
 		}
@@ -143,10 +171,22 @@ public class Controller {
 			descriptionRepository.save(description);
 			try {
 				String sastoken = keyVaultService.getSecret("storagesastoken");
+				String cacheKey = keyVaultService.getSecret("cacheKey");
+
 				try {
 					storageService = new StorageService(sastoken);
 					storageService.deleteFile(id);
 					storageService.uploadFile(file, id);
+					try {
+						cacheService = new CacheService(cacheKey);
+						cacheService.deleteFromCacheById(id.toString());
+						cacheService.insertCache(id.toString(), description);
+					} catch (Exception e) {
+						ModelAndView modelAndView = new ModelAndView();
+						model.addAttribute("message", "could not access cache" + e.getMessage());
+						modelAndView.setViewName("error");
+						return modelAndView;
+					}
 				} catch (Exception e) {
 					ModelAndView modelAndView = new ModelAndView();
 					model.addAttribute("message", "could not access storage service" + e.getMessage());
