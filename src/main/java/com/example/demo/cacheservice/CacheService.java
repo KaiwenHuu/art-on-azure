@@ -4,6 +4,7 @@ import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
+import java.util.List;
 
 import com.example.demo.entity.Description;
 
@@ -25,10 +26,16 @@ public class CacheService {
   private JedisShardInfo shardInfo = new JedisShardInfo(hostname, port, ssl);
 
   public boolean idExists(String id) {
-    Jedis jedis = new Jedis();
+    Jedis jedis = new Jedis(shardInfo);
     boolean exists = jedis.exists(id.getBytes());
     jedis.close();
     return exists;
+  }
+
+  public List<Object> getFromCache(byte[] keys) {
+    Jedis jedis = new Jedis(shardInfo);
+    List<byte[]> values = jedis.mget(keys);
+    return null;
   }
 
   public Object getFromCacheById(String id) {
@@ -70,11 +77,11 @@ public class CacheService {
 			oos = new ObjectOutputStream(baos);
 			oos.writeObject(description);
 			byte[] bytes = baos.toByteArray();
-			return bytes;
+      return bytes;
 		} catch (Exception e) {
-
+      return null;
 		}
-		return null;
+		
 	}
   
 }
