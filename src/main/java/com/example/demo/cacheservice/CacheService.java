@@ -37,7 +37,6 @@ public class CacheService {
 		List<Object> results = new ArrayList<Object>();
     Jedis jedis = new Jedis(shardInfo);
 		List<String> keys = jedis.keys(pattern).stream().toList();
-		// ByteArrayO
 		for (String key : keys){
 			byte[] result = jedis.get(key.getBytes());
 			results.add(unserialize(result));
