@@ -44,7 +44,7 @@ public class Controller {
 
 	@RequestMapping("/")
 	public String home() {
-		return "Hello from Azure App Service in the staging slot! We just implemented Cache Service!";
+		return "Hello from Azure App Service! We just implemented Cache Service!";
 	}
 
 	// @GetMapping("/posts")
