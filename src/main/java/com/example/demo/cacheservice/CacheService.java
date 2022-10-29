@@ -6,6 +6,7 @@ import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Set;
 
 import com.example.demo.entity.Description;
 
@@ -35,13 +36,13 @@ public class CacheService {
 
   public List<Object> getFromCache(String pattern) {
 		List<Object> results = new ArrayList<Object>();
-    // Jedis jedis = new Jedis(shardInfo);
-		// List<String> keys = jedis.keys(pattern).stream().toList();
-		// for (String key : keys){
-		// 	byte[] result = jedis.get(key.getBytes());
-		// 	results.add(unserialize(result));
-		// }
-		// jedis.close();
+    Jedis jedis = new Jedis(shardInfo);
+		Set<String> keys = jedis.keys(pattern);
+		for (String key : keys){
+			byte[] result = jedis.get(key.getBytes());
+			results.add(unserialize(result));
+		}
+		jedis.close();
     return results;
   }
 

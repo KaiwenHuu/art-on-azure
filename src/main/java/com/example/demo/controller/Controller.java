@@ -47,27 +47,41 @@ public class Controller {
 		return "Hello from Azure App Service in the staging slot! We just implemented Cache Service!";
 	}
 
-	@GetMapping("/posts")
-	public ModelAndView getPosts(ModelMap model) {
-		ModelAndView modelAndView = new ModelAndView();
-		List<Description> descriptions = descriptionRepository.findAll();
+	// @GetMapping("/posts")
+	// public ModelAndView getPosts(ModelMap model) {
+	// ModelAndView modelAndView = new ModelAndView();
+	// List<Description> descriptions = descriptionRepository.findAll();
 
-		model.addAttribute("descriptions", descriptions);
-		modelAndView.setViewName("posts");
+	// model.addAttribute("descriptions", descriptions);
+	// modelAndView.setViewName("posts");
+	// return modelAndView;
+	// }
+
+	@GetMapping("/posts")
+	public ModelAndView getPostsFromCache(ModelMap model) {
+		ModelAndView modelAndView = new ModelAndView();
+		try {
+			String cacheKey = keyVaultService.getSecret("cacheKey");
+			try {
+				cacheService = new CacheService(cacheKey);
+				List<Object> descriptions = cacheService.getFromCache("*");
+				model.addAttribute("descriptions", descriptions);
+				modelAndView.setViewName("posts");
+
+			} catch (Exception e) {
+				model.addAttribute("message", "could not access cache" + e.getMessage());
+				modelAndView.setViewName("error");
+				return modelAndView;
+			}
+
+		} catch (Exception e) {
+			model.addAttribute("message", "could not access key vault" + e.getMessage());
+			modelAndView.setViewName("error");
+			return modelAndView;
+		}
+
 		return modelAndView;
 	}
-
-	// @GetMapping("/posts")
-	// public ModelAndView getPostsFromCache(ModelMap model) {
-	// 	ModelAndView modelAndView = new ModelAndView();
-	// 	String cacheKey = keyVaultService.getSecret("cacheKey");
-	// 	cacheService = new CacheService(cacheKey);
-	// 	List<Object> descriptions = cacheService.getFromCache("*");
-
-	// 	model.addAttribute("descriptions", descriptions);
-	// 	modelAndView.setViewName("posts");
-	// 	return modelAndView;
-	// }
 
 	@RequestMapping("/new-art")
 	public ModelAndView addArtPage() {
