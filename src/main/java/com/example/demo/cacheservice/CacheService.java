@@ -4,6 +4,7 @@ import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
+import java.util.ArrayList;
 import java.util.List;
 
 import com.example.demo.entity.Description;
@@ -32,10 +33,17 @@ public class CacheService {
     return exists;
   }
 
-  public List<Object> getFromCache(byte[] keys) {
+  public List<Object> getFromCache(String pattern) {
+		List<Object> results = new ArrayList<Object>();
     Jedis jedis = new Jedis(shardInfo);
-    List<byte[]> values = jedis.mget(keys);
-    return null;
+		List<String> keys = jedis.keys(pattern).stream().toList();
+		// ByteArrayO
+		for (String key : keys){
+			byte[] result = jedis.get(key.getBytes());
+			results.add(unserialize(result));
+		}
+		jedis.close();
+    return results;
   }
 
   public Object getFromCacheById(String id) {
@@ -81,7 +89,6 @@ public class CacheService {
 		} catch (Exception e) {
       return null;
 		}
-		
 	}
   
 }
