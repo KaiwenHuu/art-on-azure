@@ -15,7 +15,7 @@ public class StorageService {
 		blobServiceClient = new BlobServiceClientBuilder().endpoint(blobEndPoint).sasToken(sasToken).buildClient();
 	}
 
-	private static String blobEndPoint = "https://kaiwenstorage.blob.core.windows.net/";
+	private static String blobEndPoint = "https://instartgram.blob.core.windows.net/";
 	private static String clientName = "instartgram";
 	private BlobServiceClient blobServiceClient;
 

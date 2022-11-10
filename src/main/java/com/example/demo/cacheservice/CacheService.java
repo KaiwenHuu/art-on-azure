@@ -19,7 +19,7 @@ public class CacheService {
     shardInfo.setPassword(password);
   }
 
-  private static String hostname = "kaiwenrediscache.redis.cache.windows.net";
+  private static String hostname = "instartgram.redis.cache.windows.net";
 
   private static int port = 6380;
 

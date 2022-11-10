@@ -7,7 +7,7 @@ import com.azure.security.keyvault.secrets.SecretClientBuilder;
 public class KeyVaultService {
 
   private static SecretClient secretClient = new SecretClientBuilder()
-      .vaultUrl("https://instartgram.vault.azure.net/").credential(new DefaultAzureCredentialBuilder().build())
+      .vaultUrl("https://instartgram-key-vault.vault.azure.net/").credential(new DefaultAzureCredentialBuilder().build())
       .buildClient();
 
   public String getSecret(String string) {
